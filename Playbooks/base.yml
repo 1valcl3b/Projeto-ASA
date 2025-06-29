@@ -1,0 +1,120 @@
+---
+- name: Configuração base para todas as VMs
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Atualizar o sistema
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Instalar chrony (servidor NTP)
+      apt:
+        name: chrony
+        state: present
+
+    - name: Configurar servidor pool.ntp.br no chrony
+      lineinfile:
+        path: /etc/chrony/chrony.conf
+        regexp: '^pool '
+        line: 'pool pool.ntp.br iburst'
+        state: present
+
+    - name: Ativar o chrony
+      service:
+        name: chrony
+        state: started
+        enabled: yes
+
+    - name: Ajustar timezone para America/Recife
+      timezone:
+        name: America/Recife
+
+    - name: Criar grupo ifpb
+      group:
+        name: ifpb
+        state: present
+
+    - name: Criar usuários ivalcleb e pedro
+      user:
+        name: "{{ item }}"
+        groups: ifpb
+        append: yes
+        shell: /bin/bash
+        state: present
+      loop:
+        - "ivalcleb"
+        - "pedro"
+
+    - name: Criar diretório .ssh nos homes
+      file:
+        path: "/home/{{ item }}/.ssh"
+        state: directory
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0700'
+      loop:
+        - "ivalcleb"
+        - "pedro"
+
+    - name: Gerar chave SSH para ivalcleb e pedro
+      openssh_keypair:
+        path: "/home/{{ item }}/.ssh/id_rsa"
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0600'
+      loop:
+        - "ivalcleb"
+        - "pedro"
+
+    - name: Copiar chave pública para authorized_keys
+      copy:
+        src: "/home/{{ item }}/.ssh/id_rsa.pub"
+        dest: "/home/{{ item }}/.ssh/authorized_keys"
+        remote_src: yes
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0600'
+      loop:
+        - "ivalcleb"
+        - "pedro"
+
+    - name: Configurar SSH - Banner de aviso
+      copy:
+        dest: /etc/issue.net
+        content: |
+          Acesso apenas para pessoas com autorização expressa.
+          Seu acesso está sendo monitorado !!!
+
+    - name: Apontar SSH para usar banner
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?Banner'
+        line: 'Banner /etc/issue.net'
+
+    - name: Configurar SSH - bloquear root, chaves apenas, grupos permitidos
+      blockinfile:
+        path: /etc/ssh/sshd_config
+        block: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          AllowGroups vagrant ifpb
+
+    - name: Reiniciar SSH
+      service:
+        name: ssh
+        state: restarted
+
+    - name: Instalar cliente NFS
+      apt:
+        name: nfs-common
+        state: present
+
+    - name: Configurar sudo para o grupo ifpb
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '^%ifpb'
+        line: '%ifpb ALL=(ALL:ALL) ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+

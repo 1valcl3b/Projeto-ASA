@@ -1,0 +1,57 @@
+---
+- name: Configurar host cliente cli
+  hosts: cli
+  become: yes
+
+  vars:
+    mount_point: /var/nfs
+    remote_share: 192.168.56.113:/dados/nfs
+
+  tasks:
+    - name: Instalar firefox-esr e xauth
+      apt:
+        name:
+          - firefox-esr
+          - xauth
+        state: present
+        update_cache: yes
+
+    - name: Ativar encaminhamento X11 no SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?X11Forwarding'
+        line: 'X11Forwarding yes'
+
+    - name: Reiniciar o serviço SSH
+      service:
+        name: ssh
+        state: restarted
+
+    - name: Instalar autofs
+      apt:
+        name: autofs
+        state: present
+
+    - name: Configurar montagem automática via autofs
+      blockinfile:
+        path: /etc/auto.master
+        block: |
+          {{ mount_point }} /etc/auto.nfs --ghost
+
+    - name: Criar arquivo de configuração /etc/auto.nfs
+      copy:
+        dest: /etc/auto.nfs
+        content: |
+          share -rw,soft,intr {{ remote_share }}
+
+    - name: Criar ponto de montagem local
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+
+    - name: Reiniciar o serviço autofs
+      service:
+        name: autofs
+        state: restarted
+        enabled: yes
+

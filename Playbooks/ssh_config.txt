@@ -1,0 +1,56 @@
+Host arq
+  HostName 127.0.0.1
+  User vagrant
+  Port 2222
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.ed25519
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.rsa
+  IdentitiesOnly yes
+  LogLevel FATAL
+  PubkeyAcceptedKeyTypes +ssh-rsa
+  HostKeyAlgorithms +ssh-rsa
+
+Host db
+  HostName 127.0.0.1
+  User vagrant
+  Port 2200
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.ed25519
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.rsa
+  IdentitiesOnly yes
+  LogLevel FATAL
+  PubkeyAcceptedKeyTypes +ssh-rsa
+  HostKeyAlgorithms +ssh-rsa
+
+Host app
+  HostName 127.0.0.1
+  User vagrant
+  Port 2201
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.ed25519
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.rsa
+  IdentitiesOnly yes
+  LogLevel FATAL
+  PubkeyAcceptedKeyTypes +ssh-rsa
+  HostKeyAlgorithms +ssh-rsa
+
+Host cli
+  HostName 127.0.0.1
+  User vagrant
+  Port 2202
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.ed25519
+  IdentityFile /home/ivalcleb/.vagrant.d/insecure_private_keys/vagrant.key.rsa
+  IdentitiesOnly yes
+  LogLevel FATAL
+  PubkeyAcceptedKeyTypes +ssh-rsa
+  HostKeyAlgorithms +ssh-rsa
+
