@@ -1,17 +1,24 @@
-  Projeto DevOps com Vagrant e Ansible
-Integrantes da equipe: Pedro Henrique Remigio Fernandes Thomaz e Ivalcleb
+# Projeto DevOps com Vagrant e Ansible
+
+Integrantes da equipe: Pedro Henrique Remigio Fernandes Thomaz e Ivalcleb Leoncio Benigno de Souza
 Disciplina: Administração de Sistemas Abertos
 Professor: Leonidas Francisco de Lima Júnior
 
-  Introdução
+## Introdução
 Este projeto tem como objetivo o provisionamento e configuração automática de uma infraestrutura composta por quatro máquinas virtuais Linux (Debian), utilizando as ferramentas Vagrant e Ansible. O ambiente é configurado para simular um cenário real de DevOps, envolvendo servidores de arquivos, banco de dados, aplicação e um host cliente, com automação de serviços como SSH, NFS, LVM, DHCP, Apache e MariaDB. Toda a documentação, bem como os arquivos de configuração (Vagrantfile e playbooks), está descrita e incluída neste repositório.
 
-  Vagrantfile
+## Vagrantfile
+
 O projeto inclui um Vagrantfile que define a criação de quatro máquinas virtuais:
-Servidor de Arquivos (arq): hostname arq.ivalcleb.pedro.devops, IP estático 192.168.56.113, 512 MB de RAM, três discos adicionais de 10 GB cada.
-Servidor de Banco de Dados (db): hostname db.ivalcleb.pedro.devops, IP via DHCP, 512 MB de RAM.
-Servidor de Aplicação (app): hostname app.ivalcleb.pedro.devops, IP via DHCP, 512 MB de RAM.
-Cliente (cli): hostname cli.ivalcleb.pedro.devops, IP via DHCP, 1024 MB de RAM.
+
+- Servidor de Arquivos (arq): hostname arq.ivalcleb.pedro.devops, IP estático 192.168.56.113, 512 MB de RAM, três discos adicionais de 10 GB cada.
+
+- Servidor de Banco de Dados (db): hostname db.ivalcleb.pedro.devops, IP via DHCP, 512 MB de RAM.
+
+- Servidor de Aplicação (app): hostname app.ivalcleb.pedro.devops, IP via DHCP, 512 MB de RAM.
+
+- Cliente (cli): hostname cli.ivalcleb.pedro.devops, IP via DHCP, 1024 MB de RAM.
+  
 Todas as máquinas usam a box debian/bookworm64, com linked_clone habilitado, guest additions desabilitado e sem geração de novas chaves SSH.
 
   Playbook app.yml
