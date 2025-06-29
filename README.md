@@ -1,7 +1,9 @@
 # Projeto DevOps com Vagrant e Ansible
 
 Integrantes da equipe: Pedro Henrique Remigio Fernandes Thomaz e Ivalcleb Leoncio Benigno de Souza
+
 Disciplina: Administração de Sistemas Abertos
+
 Professor: Leonidas Francisco de Lima Júnior
 
 ## Introdução
