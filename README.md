@@ -78,24 +78,20 @@ Os playbooks foram organizados de acordo com as responsabilidades de cada máqui
 - **VirtualBox** instalado  
 - **Vagrant** instalado  
 - **Ansible** instalado no host  
-- Conexão com a Internet  
+  
 
 ### **Passos para execução**
 
 1. **Clone este repositório:**
    ```bash
-   git clone <URL_DO_REPO>
-   cd <PASTA_DO_PROJETO>
+   git clone https://github.com/1valcl3b/Projeto-ASA
+   cd Projeto-ASA
    
 2. Desative o DHCP padrão do VirtualBox (importante):
    ```bash
-   VBoxManage list dhcpservers
-   VBoxManage dhcpserver remove --netname vboxnet0
+   vboxmanage dhcpserver stop --interface=vboxnet0
 
 3. Suba as VMs na ordem correta:
    ```bash
    vagrant up arq
    vagrant up db app cli
-
-4. Verifique se tudo funcionou
-   
