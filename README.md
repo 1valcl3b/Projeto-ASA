@@ -7,7 +7,10 @@
 **Professor:** Leonidas Francisco de Lima Júnior
 
 ## Introdução
+
+<p align="justify">
 Este projeto tem como objetivo o provisionamento e configuração automática de uma infraestrutura composta por quatro máquinas virtuais Linux (Debian), utilizando as ferramentas Vagrant e Ansible. O ambiente é configurado para simular um cenário real de DevOps, envolvendo servidores de arquivos, banco de dados, aplicação e um host cliente, com automação de serviços como SSH, NFS, LVM, DHCP, Apache e MariaDB. Toda a documentação, bem como os arquivos de configuração (Vagrantfile e playbooks), está descrita e incluída neste repositório.
+</p>
 
 ## Vagrantfile
 
