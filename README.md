@@ -1,10 +1,10 @@
 # Projeto DevOps com Vagrant e Ansible
 
-Integrantes da equipe:Ivalcleb Leoncio Benigno de Souza(20232380013) e Pedro Henrique Remigio Fernandes Thomaz(20232380007)
+**Integrantes da equipe:** Ivalcleb Leoncio Benigno de Souza(20232380013) e Pedro Henrique Remigio Fernandes Thomaz(20232380007)
 
-Disciplina: Administração de Sistemas Abertos
+**Disciplina:** Administração de Sistemas Abertos
 
-Professor: Leonidas Francisco de Lima Júnior
+**Professor:** Leonidas Francisco de Lima Júnior
 
 ## Introdução
 Este projeto tem como objetivo o provisionamento e configuração automática de uma infraestrutura composta por quatro máquinas virtuais Linux (Debian), utilizando as ferramentas Vagrant e Ansible. O ambiente é configurado para simular um cenário real de DevOps, envolvendo servidores de arquivos, banco de dados, aplicação e um host cliente, com automação de serviços como SSH, NFS, LVM, DHCP, Apache e MariaDB. Toda a documentação, bem como os arquivos de configuração (Vagrantfile e playbooks), está descrita e incluída neste repositório.
