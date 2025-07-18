@@ -23,9 +23,9 @@ O projeto inclui um Vagrantfile que define a criação de quatro máquinas virtu
 - Servidor de Aplicação (app): hostname app.ivalcleb.pedro.devops, IP via DHCP, 512 MB de RAM.
 
 - Cliente (cli): hostname cli.ivalcleb.pedro.devops, IP via DHCP, 1024 MB de RAM.
-  
+<p align="justify">  
 Todas as máquinas usam a box debian/bookworm64, com linked_clone habilitado, guest additions desabilitado e sem geração de novas chaves SSH.
-
+</p>
 ## Playbooks 
 
 Os playbooks foram organizados de acordo com as responsabilidades de cada máquina:
