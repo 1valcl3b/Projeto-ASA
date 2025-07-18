@@ -1,0 +1,61 @@
+---
+- name: Configurar NFS no servidor arq
+  hosts: arq
+  become: yes
+
+  vars:
+    nfs_user: nfs-ifpb
+    shared_dir: /dados/nfs
+    subnet: 192.168.56.0/24
+
+  tasks:
+    - name: Instalar o servidor NFS
+      apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: yes
+
+    - name: Criar usuário nfs-ifpb sem shell
+      user:
+        name: "{{ nfs_user }}"
+        shell: /usr/sbin/nologin
+        create_home: yes
+        state: present
+
+    - name: Criar diretório compartilhado
+      file:
+        path: "{{ shared_dir }}"
+        state: directory
+        owner: "{{ nfs_user }}"
+        group: "{{ nfs_user }}"
+        mode: '0750'
+
+    - name: Obter UID do usuário nfs-ifpb
+      command: id -u {{ nfs_user }}
+      register: uid
+      changed_when: false
+
+    - name: Obter GID do grupo nfs-ifpb
+      command: id -g {{ nfs_user }}
+      register: gid
+      changed_when: false
+
+    - name: Armazenar UID e GID em variáveis
+      set_fact:
+        nfs_uid: "{{ uid.stdout }}"
+        nfs_gid: "{{ gid.stdout }}"
+
+    - name: Configurar /etc/exports
+      copy:
+        dest: /etc/exports
+        content: |
+          {{ shared_dir }} {{ subnet }}(rw,sync,no_subtree_check,all_squash,anonuid={{ nfs_uid }},anongid={{ nfs_gid }})
+      notify: Restart NFS
+
+  handlers:
+    - name: Restart NFS
+      service:
+        name: nfs-kernel-server
+        state: restarted
+        enabled: yes
+

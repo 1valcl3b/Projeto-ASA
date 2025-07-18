@@ -1,0 +1,70 @@
+---
+- name: Configurar LVM no servidor arq
+  hosts: arq
+  become: yes
+
+  vars:
+    vg_name: dados
+    lv_name: ifpb
+    lv_size: 15G
+    mount_point: /dados
+
+  tasks:
+    - name: Instalar pacotes LVM e parted
+      apt:
+        name:
+          - lvm2
+          - parted
+        state: present
+        update_cache: yes
+
+    - name: Criar partições nos discos adicionais
+      parted:
+        device: "/dev/{{ item }}"
+        number: 1
+        state: present
+        part_type: primary
+        fs_type: ext4
+        resize: yes
+      loop:
+        - sdb
+        - sdc
+        - sdd
+
+    - name: Criar volumes físicos
+      command: pvcreate /dev/{{ item }}1
+      loop:
+        - sdb
+        - sdc
+        - sdd
+      args:
+        creates: "/dev/{{ item }}1"
+
+    - name: Criar volume group
+      command: vgcreate {{ vg_name }} /dev/sdb1 /dev/sdc1 /dev/sdd1
+      args:
+        creates: "/dev/{{ vg_name }}"
+
+    - name: Criar logical volume
+      command: lvcreate -L {{ lv_size }} -n {{ lv_name }} {{ vg_name }}
+      args:
+        creates: "/dev/{{ vg_name }}/{{ lv_name }}"
+
+    - name: Formatar o logical volume com ext4
+      filesystem:
+        fstype: ext4
+        dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+
+    - name: Criar ponto de montagem
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+
+    - name: Adicionar entrada no /etc/fstab
+      mount:
+        path: "{{ mount_point }}"
+        src: "/dev/{{ vg_name }}/{{ lv_name }}"
+        fstype: ext4
+        opts: defaults
+        state: mounted
+
