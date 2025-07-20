@@ -50,7 +50,7 @@ Vagrant.configure("2") do |config|
   # VM: Servidor de Banco de Dados (db)
   config.vm.define "db" do |db|
     db.vm.hostname = "db.ivalcleb.pedro.devops"
-    db.vm.network :private_network, type: "dhcp", mac: "aabbccddee01"
+    db.vm.network :private_network, type: "dhcp", mac: "08:00:27:3a:50:5b"
 
     db.vm.provision "ansible" do |ansible|
       ansible.compatibility_mode = "2.0"
@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
   # VM: Servidor de Aplicações (app)
   config.vm.define "app" do |app|
     app.vm.hostname = "app.ivalcleb.pedro.devops"
-    app.vm.network :private_network, type: "dhcp", mac: "aabbccddee02"
+    app.vm.network :private_network, type: "dhcp", mac: "08:00:27:3a:50:5c"
 
     app.vm.provision "ansible" do |ansible|
       ansible.compatibility_mode = "2.0"
