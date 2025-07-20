@@ -4,8 +4,8 @@
   become: yes
 
   vars:
-    db_mac: "AA:BB:CC:DD:EE:01"
-    app_mac: "AA:BB:CC:DD:EE:02"
+    db_mac: "08:00:27:3a:50:5b"
+    app_mac: "08:00:27:3a:50:5c"
 
   tasks:
     - name: Instalar pacote isc-dhcp-server
