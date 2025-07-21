@@ -68,6 +68,9 @@ O Ansible funcionou porque:
 	- Ele ignora seu ansible.cfg porque passa tudo via parâmetros no comando.
 
 
+scp id_rsa ifpb@192.158.56.1:/asa/ 
+
+
 ====== desabilitar servidor DHCP =======
 
 vboxmanage dhcpserver stop --interface=vboxnet0
