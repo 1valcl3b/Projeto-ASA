@@ -202,7 +202,63 @@ Responsável por configurar o LVM na VM arq. Ele:
 	- Motivo: O projeto exige o uso de LVM para montar o diretório /dados, onde será compartilhado o NFS.
 
  	
+07. nfs-arq.yml
+Este playbook configura o servidor NFS na VM arq. Ele:
 
+	Instala o pacote nfs-kernel-server, que é o serviço responsável por exportar diretórios via NFS.
+
+	Cria o usuário nfs-ifpb sem shell (/usr/sbin/nologin), por segurança, para ser o dono dos arquivos exportados.
+
+	Cria o diretório /dados/nfs, que será o ponto de compartilhamento, com permissões seguras (0750) e pertencente ao usuário e grupo nfs-ifpb.
+
+	Obtém o UID e GID do usuário nfs-ifpb, que serão usados na configuração do NFS com a opção all_squash, garantindo que acessos anônimos sejam 	mapeados corretamente.
+
+	Substitui o conteúdo de /etc/exports para exportar o diretório /dados/nfs com permissões adequadas para a rede 192.168.56.0/24.
+
+	Reinicia o serviço NFS para aplicar as configurações.
+
+	Motivação: Permite que as demais VMs montem o diretório /dados/nfs via NFS, de forma segura e automatizada.
+
+08. db.yml
+Este playbook configura o servidor de banco de dados db. Ele:
+
+	Instala o MariaDB Server, um sistema de gerenciamento de banco de dados relacional compatível com MySQL.
+
+	Instala o autofs, que permite montar diretórios automaticamente sob demanda, utilizando configurações do NFS.
+
+	Edita o arquivo /etc/auto.master para apontar o caminho /var/nfs para o arquivo de configuração /etc/auto.nfs.
+
+	Cria o arquivo /etc/auto.nfs com a entrada para montar automaticamente o compartilhamento NFS vindo da máquina arq.
+
+	Cria o diretório local /var/nfs, onde o compartilhamento será montado.
+
+	Reinicia o serviço autofs para aplicar as configurações.
+
+	Motivação: A VM db precisa acessar os dados compartilhados via NFS no diretório /dados/nfs, e o uso do autofs facilita isso de forma automática e resiliente.
+
+09. app.yml
+Este playbook configura o servidor web app. Ele:
+
+	Instala o servidor web Apache2.
+
+	Substitui o conteúdo padrão da página inicial (index.html) com uma página personalizada do projeto, contendo os nomes dos integrantes e informações da disciplina.
+
+	Instala o autofs e configura o ponto de montagem /var/nfs, da mesma forma que na VM db.
+
+	Motivação: A VM app precisa servir conteúdo web e acessar os dados via NFS. Usar autofs permite montar o diretório /dados/nfs sob demanda, melhorando o desempenho e a resiliência do sistema.
+
+10. cli.yml
+Este playbook configura o cliente cli, voltado para acesso e testes com interface gráfica. Ele:
+
+	Instala o navegador Firefox ESR e o pacote xauth, que permite o uso de aplicações gráficas via SSH com redirecionamento X11.
+
+	Ativa o redirecionamento X11 no arquivo de configuração do SSH (/etc/ssh/sshd_config).
+
+	Reinicia o serviço SSH para aplicar a nova configuração.
+
+	Instala e configura o autofs para montar automaticamente o compartilhamento /dados/nfs no diretório /var/nfs.
+
+	Motivação: Permitir o uso de aplicações gráficas remotamente (via vagrant ssh cli -- -X) e acesso aos dados via NFS como nas outras VMs.
 
 ===== Anotações =====
 
