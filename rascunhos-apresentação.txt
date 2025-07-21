@@ -1,0 +1,235 @@
+ansible-playbook base.yml
+ansible-playbook dhcp-arq.yml
+ansible-playbook lvm-arq.yml 
+ansible-playbook nfs-arq.yml 
+ansible-playbook db.yml 
+ansible-playbook app.yml
+ansible-playbook cli.yml
+
+vagrant -v
+Vagrant 2.4.6
+
+Link Repositório -> https://github.com/1valcl3b/Projeto-ASA
+
+====== Explicação  =======
+
+- name: Configurar servidor DHCP autoritativo no arq
+  hosts: arq
+  become: yes
+
+O que é hosts: arq?
+	- hosts: arq significa: "Este playbook será executado apenas no host chamado arq".
+
+	- O nome arq não é arbitrário: ele precisa estar definido em algum inventário do Ansible.
+
+Como o Ansible descobre qual máquina é arq?
+
+R: Inventário Automático pelo Vagrant, Quando o Vagrant integra com Ansible, ele automaticamente gera um inventário dinâmico.
+
+No vagrantfile tem:
+			config.vm.define "arq" do |arq|
+    			    arq.vm.hostname = "arq.ivalcleb.pedro.devops"
+
+Aqui, o nome arq é o identificador da VM. O Vagrant passa esse nome para o Ansible quando roda vagrant up --provision ou vagrant provision.
+Assim, o Ansible entende que hosts: arq se refere à VM definida com config.vm.define "arq".
+
+
+Resumindo...
+
+	O hosts: arq se conecta à VM chamada arq porque:
+		- O nome arq foi definido no Vagrantfile (com config.vm.define "arq").
+
+		- O Vagrant fornece esse nome automaticamente ao Ansible.
+
+Assim, não é preciso passar o IP ou inventário manual.
+
+
+
+
+Como o ansible se conectar as VMS ?
+
+R: O Ansible se conecta a 127.0.0.1 + porta correspondente, não precisa saber o IP interno.
+
+O Vagrant não depende do inventário externo (hosts.ini) nem do arquivo ansible.cfg. Ele:
+	1. Gera automaticamente um inventário temporário (dinâmico) com as VMs definidas no Vagrantfile.
+		- Ele sabe os IPs (seja fixos, seja DHCP) porque ele mesmo gerencia as VMs e as interfaces de rede.
+		- Esse inventário é passado diretamente para o comando ansible-playbook durante a execução
+	
+	2. Define as variáveis necessárias (ansible_user=vagrant, ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key) automaticamente com base na configuração SSH que o Vagrant já conhece.
+
+	3. Configura o ANSIBLE_HOST_KEY_CHECKING=False e outras opções via CLI, sem usar o ansible.cfg.
+
+O Ansible funcionou porque:
+
+	- O Vagrant cria automaticamente o inventário dinâmico.
+
+	- Ele injeta as opções SSH necessárias (usuário, chave, host).
+
+	- Ele ignora seu ansible.cfg porque passa tudo via parâmetros no comando.
+
+
+====== desabilitar servidor DHCP =======
+
+vboxmanage dhcpserver stop --interface=vboxnet0
+
+====== Acessar ssh com o interface gráfica ======
+
+
+vagrant ssh cli -- -X
+
+
+====== teste do servidor NFS ======
+
+arq -> /dados
+
+db,app,cli -> /var/nfs
+
+sudo touch /dados/nfs/teste.txt
+sudo chown nfs-ifpb:nfs-ifpb /dados/nfs/teste.txt
+
+
+===== Verificar usuarios =====
+
+getent passwd ivalcleb
+getent passwd pedro
+
+
+===== verficar grupos ======
+
+groups ivalcleb
+groups pedro
+
+
+====== Apresentação ======
+
+01. O Vagrantfile é o arquivo central que define a infraestrutura virtual do projeto. Utilizamos ele para:
+
+	- Criar automaticamente as quatro máquinas virtuais: arq, db, app, e cli.
+
+	- Definir configurações como hostname, quantidade de RAM, interfaces de rede e IPs.
+
+	- Configurar a VM arq com IP estático, pois ela atua como servidor DHCP, NFS e LVM.
+
+	- Configurar as outras VMs (db, app e cli) para receber IP via DHCP (simulando ambiente real).
+
+	- Criar três discos adicionais na VM arq usando sintaxe moderna do Vagrant (vm.disk), pois o projeto exige configuração de LVM.
+
+Motivação: O uso do Vagrant garante que o ambiente seja reprodutível, padronizado e fácil de levantar em qualquer máquina.
+
+
+02. ansible.cfg
+
+Este arquivo é usado para configurar o comportamento do Ansible. Ele define:
+
+	- O caminho padrão para o inventário (hosts.ini), evitando ter que passar -i em todos os comandos.
+
+Desativa a verificação de chaves de host (host_key_checking = False), pois as VMs são destruídas/recriadas constantemente e suas chaves mudam.
+
+Motivacao: Facilita a execução dos playbooks, especialmente em ambientes dinâmicos como o Vagrant.
+
+03. hosts.ini
+
+Este arquivo define os IPs e acessos SSH para as máquinas gerenciadas pelo Ansible. Cada grupo (arq, db, app, cli) possui:
+
+	- Endereço IP
+
+	- Usuário de acesso (vagrant)
+
+	- Caminho da chave SSH privada gerada pelo Vagrant
+
+	- Porta de conexão SSH (caso usada via forward)
+
+Motivação: Permite que o Ansible saiba como se conectar a cada VM. Ele é atualizado dinamicamente após vagrant up, com base no vagrant ssh-config.
+
+04. base.yml
+
+Este playbook é executado em todas as VMs para aplicar uma configuração base comum. Ele:
+
+	- Atualiza os pacotes do sistema (update/upgrade)
+
+	- Instala e configura o chrony com servidor pool.ntp.br
+
+	- Ajusta o timezone para America/Recife
+
+	- Cria o grupo ifpb e os usuários ivalcleb e pedro
+
+	- Cria diretórios .ssh e configura chaves públicas
+
+Configura o SSH para:
+
+	- Bloquear root
+
+	- Permitir apenas chaves
+
+	- Restringir o acesso aos grupos ifpb e vagrant
+
+	- Exibir banner de aviso
+
+	- Instala o cliente NFS
+
+	- Configura permissão sudo para o grupo ifpb
+
+Motivação:Garante que todas as VMs estejam com configuração de tempo, segurança e acesso padronizados.
+
+05. dhcp-arq.yml
+
+Responsável por instalar e configurar o servidor DHCP na VM arq. Ele:
+
+	- Instala isc-dhcp-server
+
+	- Define a interface a ser usada
+
+	- Cria escopo da rede 192.168.56.0/24
+
+	- Define gateway, tempo de lease(É o tempo de validade de um IP atribuído pelo servidor DHCP a um cliente.) e DNS
+
+	- Cria reservas estáticas para db, app e cli, usando seus respectivos MACs
+
+Motivo: O projeto exige que arq atue como servidor DHCP autoritativo, distribuindo IPs corretamente para as demais VMs.
+
+06. lvm-arq.yml
+
+Responsável por configurar o LVM na VM arq. Ele:
+
+	- Instala lvm2 e parted
+
+	- Cria partições nos discos sdb, sdc, sdd
+
+	- Cria volumes físicos (PV), grupo de volumes (VG) e volume lógico (LV)
+
+	- Formata como ext4 e monta em /dados com fstab
+
+	- Motivo: O projeto exige o uso de LVM para montar o diretório /dados, onde será compartilhado o NFS.
+
+ 	
+
+
+===== Anotações =====
+
+Subir o vagrant e nele está imbutido a chamada dos playbooks, usar comandos internos do vagrant
+
+
+
+
+
+
+
+
+
+
+
+
+ Solução viável e segura: usar o ansible_local para provisionar via Ansible dentro da própria VM
+
+Por quê?
+O Vagrant tenta rodar o Ansible do host (modo ansible), o que exige que o IP da VM esteja conhecido.
+
+Quando a VM está em DHCP e ainda não recebeu IP, o Ansible do host não consegue conectar.
+
+Mas se usamos o ansible_local, o Ansible é executado dentro da própria VM, sem precisar saber IP nenhum.
+
+
+
+
+
+
